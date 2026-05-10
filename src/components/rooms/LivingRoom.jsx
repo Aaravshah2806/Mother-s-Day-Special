@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useEditMode } from '../../context/EditContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LIVING_ROOM_DATA } from '../../data/roomData';
 import EditablePhoto from '../ui/EditablePhoto';
@@ -60,14 +61,16 @@ function Polaroid({ photo, index }) {
 export default function LivingRoom() {
   const { slides, polaroids } = LIVING_ROOM_DATA;
   const [current, setCurrent] = useState(0);
+  const { isEditMode } = useEditMode();
 
   // Auto-advance slideshow
   useEffect(() => {
+    if (isEditMode) return; // Pause auto-advance in edit mode so they can upload files
     const t = setInterval(() => {
       setCurrent(c => (c + 1) % slides.length);
     }, 4000);
     return () => clearInterval(t);
-  }, [slides.length]);
+  }, [slides.length, isEditMode]);
 
   return (
     <div style={{ color: 'white', maxWidth: 900, margin: '0 auto' }}>
