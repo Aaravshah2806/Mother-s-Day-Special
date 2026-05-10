@@ -104,7 +104,7 @@ export default function EditablePhoto({ dataKey, defaultUrl, alt, style, imgProp
           <input
             ref={inputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             onChange={onFileChange}
             style={{ display: 'none' }}
           />

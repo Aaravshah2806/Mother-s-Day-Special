@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import heic2any from 'heic2any';
 
 const PREFIX = 'hom_';
 
@@ -70,7 +71,23 @@ export function useCustomPhoto(key, defaultUrl) {
 
 /* ─── Image compression ─── */
 
-function compressImage(file, maxWidth, quality) {
+async function compressImage(file, maxWidth, quality) {
+  let imageFile = file;
+
+  // Convert HEIC/HEIF to JPEG first
+  const ext = file.name.toLowerCase();
+  if (file.type === 'image/heic' || file.type === 'image/heif' || ext.endsWith('.heic') || ext.endsWith('.heif')) {
+    try {
+      const convertedBlob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.8 });
+      // heic2any can return an array of blobs or a single blob
+      const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+      imageFile = new File([blob], file.name.replace(/\.hei[cf]$/i, '.jpg'), { type: 'image/jpeg' });
+    } catch (err) {
+      console.warn("Failed to convert HEIC:", err);
+      // fallback to continuing and hoping browser supports it, though unlikely
+    }
+  }
+
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -91,7 +108,7 @@ function compressImage(file, maxWidth, quality) {
       };
       img.src = e.target.result;
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(imageFile);
   });
 }
 
